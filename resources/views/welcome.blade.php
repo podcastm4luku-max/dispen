@@ -450,21 +450,23 @@
     @if(isset($bannerIklans) && $bannerIklans->isNotEmpty())
     <section class="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 mb-16 relative z-20">
         <div id="infografis-banner-carousel" class="relative group overflow-hidden rounded-2xl md:rounded-3xl shadow-xl border border-sky-300/80 bg-[#cfe2ed]">
-            <!-- Carousel Slides Track: Besar, Menarik & Elegan Sesuai Format Resmi -->
+            <!-- Carousel Slides Track: Slide Horizontal Tanpa Tumpukan Transparansi Teks -->
             <div class="relative w-full aspect-[1881/502] min-h-[220px] sm:min-h-[320px] md:min-h-[400px] lg:min-h-[460px] overflow-hidden bg-[#cfe2ed]">
-                @foreach($bannerIklans as $idx => $bIklan)
-                <div class="banner-slide-item absolute inset-0 w-full h-full transition-all duration-700 ease-in-out {{ $idx === 0 ? 'opacity-100 z-10 scale-100 pointer-events-auto' : 'opacity-0 z-0 scale-[0.99] pointer-events-none' }}" data-banner-index="{{ $idx }}">
-                    @if($bIklan->link_url && $bIklan->link_url !== '#' && $bIklan->link_url !== '')
-                    <a href="{{ $bIklan->link_url }}" target="{{ $bIklan->target ?? '_self' }}" class="block w-full h-full relative cursor-pointer group/banner" title="{{ $bIklan->title }}">
-                        <img src="{{ Str::startsWith($bIklan->image, 'http') ? $bIklan->image : asset($bIklan->image) }}" alt="{{ $bIklan->title }}" class="w-full h-full object-cover sm:object-contain object-center transform group-hover/banner:scale-[1.01] transition-transform duration-500">
-                    </a>
-                    @else
-                    <div class="w-full h-full relative">
-                        <img src="{{ Str::startsWith($bIklan->image, 'http') ? $bIklan->image : asset($bIklan->image) }}" alt="{{ $bIklan->title }}" class="w-full h-full object-cover sm:object-contain object-center">
+                <div id="banner-slides-track" class="flex w-full h-full transition-transform duration-700 ease-in-out" style="transform: translateX(0%);">
+                    @foreach($bannerIklans as $idx => $bIklan)
+                    <div class="banner-slide-item w-full h-full shrink-0 min-w-full relative flex items-center justify-center" data-banner-index="{{ $idx }}">
+                        @if($bIklan->link_url && $bIklan->link_url !== '#' && $bIklan->link_url !== '')
+                        <a href="{{ $bIklan->link_url }}" target="{{ $bIklan->target ?? '_self' }}" class="block w-full h-full relative cursor-pointer group/banner" title="{{ $bIklan->title }}">
+                            <img src="{{ Str::startsWith($bIklan->image, 'http') ? $bIklan->image : asset($bIklan->image) }}" alt="{{ $bIklan->title }}" class="w-full h-full object-cover sm:object-contain object-center transform group-hover/banner:scale-[1.01] transition-transform duration-500">
+                        </a>
+                        @else
+                        <div class="w-full h-full relative">
+                            <img src="{{ Str::startsWith($bIklan->image, 'http') ? $bIklan->image : asset($bIklan->image) }}" alt="{{ $bIklan->title }}" class="w-full h-full object-cover sm:object-contain object-center">
+                        </div>
+                        @endif
                     </div>
-                    @endif
+                    @endforeach
                 </div>
-                @endforeach
             </div>
 
             @if($bannerIklans->count() > 1)
@@ -479,7 +481,7 @@
             <!-- Bottom Slide Indicators / Dots (● ● ●) -->
             <div class="absolute bottom-3 sm:bottom-5 inset-x-0 z-30 flex justify-center items-center gap-2.5 sm:gap-3" id="banner-slider-dots">
                 @foreach($bannerIklans as $idx => $bIklan)
-                <button onclick="goToBannerSlide({{ $idx }})" type="button" class="banner-dot w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full transition-all duration-300 {{ $idx === 0 ? 'bg-teal-400 ring-2 ring-white scale-125 shadow-md' : 'bg-slate-800/60 hover:bg-slate-900' }}" title="Slide {{ $idx + 1 }}: {{ $bIklan->title }}"></button>
+                <button onclick="goToBannerSlide({{ $idx }})" type="button" class="banner-dot rounded-full transition-all duration-300 {{ $idx === 0 ? 'w-6 sm:w-8 h-2 sm:h-2.5 bg-teal-400 ring-2 ring-white/80 shadow-md' : 'w-2 sm:w-2.5 h-2 sm:h-2.5 bg-slate-700/60 hover:bg-slate-900' }}" title="Slide {{ $idx + 1 }}: {{ $bIklan->title }}"></button>
                 @endforeach
             </div>
             @endif
@@ -1531,15 +1533,22 @@
 
         // Initialize Page
         document.addEventListener('DOMContentLoaded', () => {
-            renderNewsGrid();
-            renderCultureGrid();
-            initCarousel();
-            initHeroSlider();
             initBannerSlider();
-            updateTime();
-            setInterval(updateTime, 1000);
-            initTheme();
+            initHeroSlider();
+            try { initTheme(); } catch (e) { console.debug(e); }
+            try { updateTime(); setInterval(updateTime, 1000); } catch (e) { console.debug(e); }
+            try { renderNewsGrid(); } catch (e) { console.debug(e); }
+            try { renderCultureGrid(); } catch (e) { console.debug(e); }
+            try { initCarousel(); } catch (e) { console.debug(e); }
         });
+
+        // Inisialisasi mandiri bila DOM sudah siap
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                initBannerSlider();
+                initHeroSlider();
+            }, 100);
+        }
 
         // Hero Multi-Slide Slider Logic
         let currentHeroSlide = 0;
@@ -1637,13 +1646,28 @@
             container.addEventListener('mouseleave', () => {
                 startBannerSlideTimer();
             });
+
+            // Touch Swipe Support for mobile devices
+            let touchStartX = 0;
+            let touchEndX = 0;
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+            container.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                if (touchStartX - touchEndX > 50) {
+                    nextBannerSlide();
+                } else if (touchEndX - touchStartX > 50) {
+                    prevBannerSlide();
+                }
+            }, { passive: true });
         }
 
         function startBannerSlideTimer() {
             if (bannerSlideTimer) clearInterval(bannerSlideTimer);
             bannerSlideTimer = setInterval(() => {
                 nextBannerSlide();
-            }, 6000);
+            }, 5000);
         }
 
         function showBannerSlide(index) {
@@ -1655,15 +1679,10 @@
 
             currentBannerSlide = (index + slides.length) % slides.length;
 
-            slides.forEach((slide, idx) => {
-                if (idx === currentBannerSlide) {
-                    slide.classList.remove('opacity-0', 'z-0', 'scale-[0.99]', 'pointer-events-none');
-                    slide.classList.add('opacity-100', 'z-10', 'scale-100', 'pointer-events-auto');
-                } else {
-                    slide.classList.remove('opacity-100', 'z-10', 'scale-100', 'pointer-events-auto');
-                    slide.classList.add('opacity-0', 'z-0', 'scale-[0.99]', 'pointer-events-none');
-                }
-            });
+            const track = document.getElementById('banner-slides-track');
+            if (track) {
+                track.style.transform = `translateX(-${currentBannerSlide * 100}%)`;
+            }
 
             // Update dots
             const dotsContainer = document.getElementById('banner-slider-dots');
@@ -1671,9 +1690,9 @@
                 const dots = dotsContainer.querySelectorAll('.banner-dot');
                 dots.forEach((dot, idx) => {
                     if (idx === currentBannerSlide) {
-                        dot.className = 'banner-dot w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full transition-all duration-300 bg-teal-400 ring-2 ring-white scale-125 shadow-md';
+                        dot.className = 'banner-dot rounded-full transition-all duration-300 w-6 sm:w-8 h-2 sm:h-2.5 bg-teal-400 shadow-md ring-2 ring-white/80';
                     } else {
-                        dot.className = 'banner-dot w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full transition-all duration-300 bg-slate-800/60 hover:bg-slate-900';
+                        dot.className = 'banner-dot rounded-full transition-all duration-300 w-2 sm:w-2.5 h-2 sm:h-2.5 bg-slate-700/60 hover:bg-slate-900';
                     }
                 });
             }
@@ -1701,8 +1720,10 @@
             const dateStr = now.toLocaleDateString('id-ID', optionsDate);
             const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIT';
             
-            document.getElementById('current-date').innerText = dateStr;
-            document.getElementById('current-time').innerText = timeStr;
+            const dateEl = document.getElementById('current-date');
+            const timeEl = document.getElementById('current-time');
+            if (dateEl) dateEl.innerText = dateStr;
+            if (timeEl) timeEl.innerText = timeStr;
         }
 
         // Theme Toggle
@@ -1742,6 +1763,7 @@
         // Carousel Logic
         function initCarousel() {
             const dotsContainer = document.getElementById('slide-dots');
+            if (!dotsContainer) return;
             dotsContainer.innerHTML = '';
             slides.forEach((_, idx) => {
                 const dot = document.createElement('button');
@@ -1768,22 +1790,32 @@
         }
 
         function updateSlideView() {
+            if (!slides || !slides[currentSlide]) return;
             const slide = slides[currentSlide];
-            document.getElementById('hero-img').src = slide.img;
-            document.getElementById('hero-title').innerText = slide.title;
-            document.getElementById('hero-desc').innerText = slide.desc;
-            document.getElementById('hero-tag').innerText = slide.tag;
-            document.getElementById('hero-date').innerHTML = `<i class="far fa-clock mr-1"></i> ${slide.date}`;
+            const imgEl = document.getElementById('hero-img');
+            const titleEl = document.getElementById('hero-title');
+            const descEl = document.getElementById('hero-desc');
+            const tagEl = document.getElementById('hero-tag');
+            const dateEl = document.getElementById('hero-date');
+            if (imgEl) imgEl.src = slide.img;
+            if (titleEl) titleEl.innerText = slide.title;
+            if (descEl) descEl.innerText = slide.desc;
+            if (tagEl) tagEl.innerText = slide.tag;
+            if (dateEl) dateEl.innerHTML = `<i class="far fa-clock mr-1"></i> ${slide.date}`;
 
-            const dots = document.getElementById('slide-dots').children;
-            Array.from(dots).forEach((dot, idx) => {
-                dot.className = `w-2.5 h-2.5 rounded-full transition-all ${idx === currentSlide ? 'bg-amber-400 w-6' : 'bg-white/50'}`;
-            });
+            const dotsContainer = document.getElementById('slide-dots');
+            if (dotsContainer) {
+                const dots = dotsContainer.children;
+                Array.from(dots).forEach((dot, idx) => {
+                    dot.className = `w-2.5 h-2.5 rounded-full transition-all ${idx === currentSlide ? 'bg-amber-400 w-6' : 'bg-white/50'}`;
+                });
+            }
         }
 
         // News Grid Rendering
         function renderNewsGrid() {
             const grid = document.getElementById('news-grid');
+            if (!grid) return;
             grid.innerHTML = '';
 
             const filtered = activeCategory === 'semua' 
@@ -1845,6 +1877,7 @@
         // Culture Grid Rendering
         function renderCultureGrid() {
             const container = document.getElementById('culture-grid');
+            if (!container) return;
             container.innerHTML = '';
 
             const filtered = activeCultureTab === 'all' 

@@ -304,6 +304,7 @@ class DatabaseSeeder extends Seeder
         Complaint::truncate();
         $complaints = [
             [
+                'ticket_no' => 'LAP-2026-0001',
                 'sender_name' => 'Hendrik Pattinama, S.Pd',
                 'instansi' => 'SMAN 2 Leihitu',
                 'kategori' => 'Fasilitas Sekolah',
@@ -314,6 +315,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(5),
             ],
             [
+                'ticket_no' => 'LAP-2026-0002',
                 'sender_name' => 'Siti Rahma Lestaluhu',
                 'instansi' => 'SMA Negeri 1 Buru Selatan',
                 'kategori' => 'Fasilitas Sekolah',
@@ -324,6 +326,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(3),
             ],
             [
+                'ticket_no' => 'LAP-2026-0003',
                 'sender_name' => 'Markus Wattimena',
                 'instansi' => 'Masyarakat / Orang Tua',
                 'kategori' => 'Lainnya',
@@ -334,6 +337,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(2),
             ],
             [
+                'ticket_no' => 'LAP-2026-0004',
                 'sender_name' => 'Nurul Aini, S.Pd',
                 'instansi' => 'SLB Negeri Kota Tual',
                 'kategori' => 'Tenaga Pendidik',
@@ -344,6 +348,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(1),
             ],
             [
+                'ticket_no' => 'LAP-2026-0005',
                 'sender_name' => 'Dominggus Sahertian',
                 'instansi' => 'SMAN 1 Kairatu SBB',
                 'kategori' => 'Fasilitas Sekolah',
@@ -362,6 +367,7 @@ class DatabaseSeeder extends Seeder
         PpidRequest::truncate();
         $ppidRequests = [
             [
+                'nomor_permohonan' => 'PPID-2026-0001',
                 'nama_pemohon' => 'Dr. Ahmad Renhoat, M.Si',
                 'nik' => '8171011203850001',
                 'email' => 'ahmad.renhoat@univ-pattimura.ac.id',
@@ -371,6 +377,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(6),
             ],
             [
+                'nomor_permohonan' => 'PPID-2026-0002',
                 'nama_pemohon' => 'Maria Magdalena Soumokil',
                 'nik' => '8171024508920002',
                 'email' => 'maria.soumokil@pers.id',
@@ -380,6 +387,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(4),
             ],
             [
+                'nomor_permohonan' => 'PPID-2026-0003',
                 'nama_pemohon' => 'Faisal Tuasikal, S.Pd',
                 'nik' => '8101031904880003',
                 'email' => 'faisal.tuasikal@gmail.com',
@@ -389,6 +397,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(3),
             ],
             [
+                'nomor_permohonan' => 'PPID-2026-0004',
                 'nama_pemohon' => 'Yuliana Tetelepta',
                 'nik' => '8103046206950004',
                 'email' => 'yuliana.tetelepta@gmail.com',
@@ -398,6 +407,7 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now()->subDays(2),
             ],
             [
+                'nomor_permohonan' => 'PPID-2026-0005',
                 'nama_pemohon' => 'Ibrahim Pellu',
                 'nik' => '8106012301900005',
                 'email' => 'ibrahim.pellu@lsm-maluku.org',
@@ -655,7 +665,7 @@ class DatabaseSeeder extends Seeder
                     'is_active' => true,
                 ],
                 [
-                    'title' => 'H. Abdullah Vanath, S.Sos., M.M.A.',
+                    'title' => 'H. Abdullah Vanath, S.Sos.',
                     'subtitle' => 'WAKIL GUBERNUR PROVINSI MALUKU',
                     'type' => 'banner',
                     'description' => 'Mendukung percepatan pembangunan pendidikan berkualitas dan kebudayaan unggul di Bumi Raja-Raja Maluku.',
@@ -663,6 +673,17 @@ class DatabaseSeeder extends Seeder
                     'link_url' => '#',
                     'target' => '_self',
                     'order' => 2,
+                    'is_active' => true,
+                ],
+                [
+                    'title' => 'Ir. Sadali IE, M.Si., IPU',
+                    'subtitle' => 'SEKRETARIS DAERAH PROVINSI MALUKU',
+                    'type' => 'banner',
+                    'description' => 'Mewujudkan tata kelola pemerintahan yang bersih, melayani, dan akuntabel di Provinsi Maluku.',
+                    'image' => '/uploads/banners/banner_sekda_sadali_ie_hd.png',
+                    'link_url' => '#',
+                    'target' => '_self',
+                    'order' => 3,
                     'is_active' => true,
                 ],
             ];

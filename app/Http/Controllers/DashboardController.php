@@ -1226,6 +1226,12 @@ class DashboardController extends Controller
     protected function generatePpidNumber(): string
     {
         $year = date('Y');
+
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('ppid_requests', 'nomor_permohonan')) {
+            $nextNum = max((\App\Models\PpidRequest::max('id') ?? 0) + 1, 1);
+            return 'PPID-' . $year . '-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+        }
+
         $latest = \App\Models\PpidRequest::where('nomor_permohonan', 'LIKE', "PPID-{$year}-%")
             ->orderBy('id', 'desc')
             ->first();
@@ -1248,6 +1254,12 @@ class DashboardController extends Controller
     protected function generateTicketNumber(): string
     {
         $year = date('Y');
+
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('complaints', 'ticket_no')) {
+            $nextNum = max((\App\Models\Complaint::max('id') ?? 0) + 1, 1);
+            return 'LAP-' . $year . '-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+        }
+
         $latest = \App\Models\Complaint::where('ticket_no', 'LIKE', "LAP-{$year}-%")
             ->orderBy('id', 'desc')
             ->first();
@@ -1319,8 +1331,7 @@ class DashboardController extends Controller
             $ticketNo = $this->generateTicketNumber();
             $complaintTitle = "[{$kategori}] " . $nama . ($instansi ? " ({$instansi})" : '');
 
-            \App\Models\Complaint::create([
-                'ticket_no' => $ticketNo,
+            $complaintPayload = [
                 'sender_name' => $nama,
                 'instansi' => $instansi,
                 'kategori' => $kategori,
@@ -1328,7 +1339,12 @@ class DashboardController extends Controller
                 'title' => $complaintTitle,
                 'description' => $pesan,
                 'status' => 'Menunggu Respon',
-            ]);
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('complaints', 'ticket_no')) {
+                $complaintPayload['ticket_no'] = $ticketNo;
+            }
+
+            \App\Models\Complaint::create($complaintPayload);
 
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -1652,8 +1668,12 @@ class DashboardController extends Controller
 
         $data = $validator->validated();
         $data['status'] = 'Menunggu Respon';
-        if (empty($data['ticket_no'])) {
-            $data['ticket_no'] = $this->generateTicketNumber();
+        if (\Illuminate\Support\Facades\Schema::hasColumn('complaints', 'ticket_no')) {
+            if (empty($data['ticket_no'])) {
+                $data['ticket_no'] = $this->generateTicketNumber();
+            }
+        } else {
+            unset($data['ticket_no']);
         }
         $created = Complaint::create($data);
 
